@@ -14,14 +14,22 @@ class UserInfoError(Exception):
 
 
 class LiveInfoGet:
-    def __init__(self, user_id: int = -1, room_id: int = -1):
+    def __init__(self, user_id: int = -1, room_id: int = -1, new_general: bool = False,
+                 up_name: str = '资深小狐狸', crtl_name: str = '吾名喵喵之翼'):
         """
         you can Enter any of these parameter or not all of them
         :param user_id: get in homepage(e.g. https://space.bilibili.com/3117538/ is 3117538)
         :param room_id: live room id which is got in live homepage(e.g. https://live.bilibili.com/34162 is 34162)
         """
+        # parameter initial zone
         self.room_id = room_id
         self.user_id = user_id
+        self.new_general = new_general
+        self.up_name = up_name
+        self.ctrl_name = crtl_name
+
+        # dictionary & list initial zone
+        #   badge_dict
         self.badge_dict = {0: 'Passer'}
         self.badge_dict.update({
             lvl: 'Fans' for lvl in range(1,21)
@@ -29,6 +37,9 @@ class LiveInfoGet:
         self.badge_dict.update({
             lvl: 'Captain' for lvl in range(21,50)
         })
+        #   general_list
+
+
         if self.user_id > 0:
             self.user_detail = user.User(uid=self.user_id)
             self.user_info = sync(self.user_detail.get_live_info())
@@ -43,10 +54,10 @@ class LiveInfoGet:
             raise UserInfoError("User_id maybe wrong, please check again")
 
     def live_danmaku(self):
-        room = live.LiveDanmaku(self.room_id)
+        self.room = live.LiveDanmaku(self.room_id)
 
-        @room.on('DANMU_MSG')
-        async def on_danmaku(event): # event -> dictionary
+        @self.room.on('DANMU_MSG')
+        async def on_danmaku(event):  # event -> dictionary
             # initial Zone
             user_fans_lvl = 0
             user_title = 'Passer'
@@ -56,6 +67,12 @@ class LiveInfoGet:
             danmaku_content = live_info[1]
             user_main_info = live_info[2]  # list[space_id, Nickname, Unknown:]
             nickname = user_main_info[1]
+            if nickname == self.ctrl_name or nickname == self.up_name:
+                match danmaku_content:
+                    case 'general choice' | 'gc' | '1':
+                        pass
+                    case _:
+                        pass
             user_fans_info = live_info[3]  # list[lvl, worn_badge, Unknown:]
             if len(user_fans_info) != 0:
                 if user_fans_info[1] == self.fans_badge:
@@ -69,12 +86,12 @@ class LiveInfoGet:
             #       [timestamp][lvl:badge]Nickname:Says
             print(f'[{trans_time}][{user_fans_lvl}:{user_title}]{nickname}:{danmaku_content}')
 
-        @room.on('SEND_GIFT')
+        @self.room.on('SEND_GIFT')
         async def on_gift(event):
             # 收到礼物
             pass
 
-        sync(room.connect())
+        sync(self.room.connect())
 
     def timestamp_to_Beijing_time(self, timestamp):
 
@@ -85,4 +102,13 @@ class LiveInfoGet:
 
         formatted_time = beijing_time.strftime("%H:%M:%S")
         return formatted_time
+
+    # def general_choice(self):
+    #
+    #     @self.room.on('DANMU_MSG')
+    #     async def msg_get(event):
+
+
+
+
 
