@@ -1,17 +1,20 @@
 # import bilibili_api
 from bilibili_api import live, sync, user
 import asyncio
+import liveget as lg
+
 
 def main():
-    user_id = 3117538
-    user_info = user.User(user_id)
-    x = sync(user_info.get_live_info())
-    # print(sync(user_info.get_user_medal()))
-    y = x['live_room']['roomid']
-    z = x['fans_badge']
-    print(x)
-    print(y)
-    print(z)
+    x = lg.LiveInfoGet(room_id=271744)
+    x.live_danmaku()
+
+    # room = live.LiveDanmaku(34162)
+    #
+    # @room.on('DANMU_MSG')
+    # async def on_danmaku(event):  # event -> dictionary
+    #     print(event)
+    #
+    # sync(room.connect())
 
 
 if __name__ == '__main__':
