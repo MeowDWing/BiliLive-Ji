@@ -1,6 +1,6 @@
 # BiliLive-Ji
 ## zh-CN
-这是一个学习用项目（练手的，没啥实际使用价值），如果您有什么问题或任何针对代码的建议与问题，欢迎在issue里提问。
+这是一个学习用项目（练手的，没啥实际使用价值），如果您有什么问题或任何针对代码的建议与问题，欢迎再issue里提问。
 
 要求： 你需要bilibili-api-python 与 python 3.9+
 
@@ -9,8 +9,12 @@
     pip install bilibili-api-python
 
 
-### 目前的功能（仅一个）
-根据直播间号或空间号连接直播间
+### 目前的功能
+
+1,根据直播间号或空间号连接直播间,并显示弹幕（见例子）
+
+2,在资深小狐狸的直播间自动参加将军抽奖（需要配置环境变量）
+
 ### 后续可能的功能
 1：弹幕抽奖
 
@@ -30,11 +34,12 @@
 
 最后一个就是完全由一个程序来跑，完全靠异步实现，这个我不知道是简单还是难，得写写试试才知道。
 
+-----
 
 ### 例子
 
+#### 连接直播间
 
------
 ```python
 import liveget as lg
 
@@ -47,6 +52,27 @@ live_room.live_danmaku()  # 开启直播流
 #   等级： 佩戴当前直播间牌子时，即牌子等级，否则为0
 #   名号： 当等级为0时，是passer；小于21时，为Fans；大于21为Captain
 ```
+
+#### 在上述功能实现的前提下增加自动回复‘。’参加抽奖
+
+```python
+# 讲上段代码中live_room改为
+live_room = lg.LiveInfoGet(room_id=34162, reply_flag=True)
+# 如果你不想看代码，则：
+# 在项目文件夹新建bililive.txt内容参考bililive.txt
+# 设置完成后，在项目文件夹新建address。txt文件，输入 .\bililive.txt
+# 如果你愿意看代码，则根据自己需要配置
+# 位置在liveget.py的environment param. zone代码段
+#
+# 之后，打开直播流
+live_room.live_danmaku()
+# 即可自动开启回复功能，每当接收到其他人输入的41个句号，则发送一个句号
+```
+
+其中，得到bililive.txt中参数信息的方式见：
+
+https://nemo2011.github.io/bilibili-api/#/get-credential
+
 -------
 
 
