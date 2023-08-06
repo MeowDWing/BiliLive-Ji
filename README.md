@@ -11,6 +11,8 @@
 
 ### 目前的功能
 
+**！！！目前，main函数还没完成，所以需要自己去写main或者直接用命令行！！！**
+
 1,根据直播间号或空间号连接直播间,并显示弹幕（见例子）
 
 2,在资深小狐狸的直播间自动参加将军抽奖（需要配置环境变量）
@@ -60,13 +62,14 @@ live_room.live_danmaku()  # 开启直播流
 live_room = lg.LiveInfoGet(room_id=34162, reply_flag=True)
 # 如果你不想看代码，则：
 # 在项目文件夹新建bililive.txt内容参考bililive.txt
+# 目前，bililive.txt里的内容需要自己更新，获取方法见下方链接
 # 设置完成后，在项目文件夹新建address。txt文件，输入 .\bililive.txt
 # 如果你愿意看代码，则根据自己需要配置
 # 位置在liveget.py的environment param. zone代码段
 #
 # 之后，打开直播流
 live_room.live_danmaku()
-# 即可自动开启回复功能，每当接收到其他人输入的41个句号，则发送一个句号
+# 即可自动开启回复功能，每当接收到其他人输入的100个句号，则发送一个句号
 ```
 
 其中，得到bililive.txt中参数信息的方式见：
