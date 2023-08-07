@@ -1,3 +1,4 @@
+import os
 e = '\033[0m'
 color_str = '\033[0m'
 color_str2 = '\033[10m'
@@ -12,6 +13,7 @@ for i in range(10,100):
     color_list.append(trans_color_str)
 print(color_list)
 i = 0
+os.system("cls")
 for lst in color_list:
     i += 1
     print(lst+'color'+lst[2:4]+e, end='\t')

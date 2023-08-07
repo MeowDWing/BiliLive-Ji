@@ -1,5 +1,5 @@
 # import bilibili_api as bapi
-import os
+import os, sys
 import iosetting as ios
 import bilibili_api
 from bilibili_api import live, sync, user, exceptions
@@ -18,15 +18,15 @@ class UserInfoError(Exception):
 
 class LiveInfoGet:
     """
-    直播间信息类，该类目前包含直播间的所有已经实现的操作，以后会细分成多个类
+    直播间信息类，该类目前包含直播间的所有已经实现的操作，以后会细分成多个类/函数
 
     Live Information class, now, the class include all of realized function, and the class will be split into
-    other classes
+    other classes/functions
     """
 
     def __init__(self, user_id: int = -1, room_id: int = -1,  # id zone
-                 up_name: str = '资深小狐狸', crtl_name: str = '吾名喵喵之翼', auto_msg = '。',  # str zone
-                 reply_flag: bool = False,  # flag zone
+                 up_name: str = '资深小狐狸', crtl_name: str = '吾名喵喵之翼', auto_msg='。',  # str zone
+                 reply_flag: bool = False, cls_flag: bool = False, debug_flag: bool = False,  # flag zone
                  dot_limit: int = 100  # limit zone
                  ):
         """
@@ -40,6 +40,7 @@ class LiveInfoGet:
         :param crtl_name: 控制用户的发言会设为亮青色，你可以设置成你的去高亮你的发言 / controller name, you can set to yourself to highlight your Danmaku
         :param auto_msg: 自定义回复内容 / customize your reply danmaku
         :param reply_flag: 回复标记，True的话开启自动回复功能，目前只适配资深小狐狸的，当然以后会有自定义方式来回复 / if the flag is True, auto reply will on
+        :param cls_flag: 清屏标记，该标记用于处理win10中cmd转义字符错误的临时标记，为True时启用
         :param dot_limit: 每dot_limit个中文句号，就自动回复一次 / every dot_limit CN full stop, reply once auto_msg
         """
         # parameter initial zone
@@ -49,6 +50,8 @@ class LiveInfoGet:
         self.ctrl_name = crtl_name
         self.dot_limit = dot_limit
         self.auto_msg = auto_msg
+        self.debug_flag = debug_flag
+        self.debug_limit = 1000
 
         self.SESSDATA = -1
         self.bili_jct = -1
@@ -56,6 +59,8 @@ class LiveInfoGet:
         self.dedeuserid = -1
 
         self.reply_flag = reply_flag
+        if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
+            os.system("cls")
 
 
         # dictionary & list initial zone
@@ -70,6 +75,7 @@ class LiveInfoGet:
         #   general_list
         # tmp zone
         self.dot_tmp = 0
+        self.debug_limit_tmp = 0
 
         if self.user_id > 0:
             self.user_detail = user.User(uid=self.user_id)
@@ -87,7 +93,7 @@ class LiveInfoGet:
             raise UserInfoError("User_id maybe wrong, please check again")
 
         # environment param. initial zone
-        if self.reply_flag is True:
+        if self.reply_flag:  # 之后会改成函数
             address_file = open(r'.\address.txt', mode='r')
             address_file = address_file.readlines()
             address = address_file[0].strip()
@@ -117,9 +123,9 @@ class LiveInfoGet:
             pass
 
     def live_danmaku(self):
-        self.room = live.LiveDanmaku(self.room_id)
+        self.room_danmaku = live.LiveDanmaku(self.room_id)
 
-        @self.room.on('DANMU_MSG')
+        @self.room_danmaku.on('DANMU_MSG')
         async def on_danmaku(event):  # event -> dictionary
             # initial Zone
             user_fans_lvl = 0
@@ -132,18 +138,29 @@ class LiveInfoGet:
             user_main_info = live_info[2]  # list[uid, Nickname, Unknown:]
             nickname = user_main_info[1]
 
-            if danmaku_content == '。':
-                self.dot_tmp += 1
-                ios.print_set(f"【!】dot now is: {self.dot_tmp}", content='SYSTEM')
-                if self.dot_tmp > self.dot_limit:
-                    self.dot_tmp = 0
-                    ios.print_set("dot reset", content='SYSTEM')
-                    await self.auto_reply(self.auto_msg)
+            if self.reply_flag:
+                if danmaku_content == '。':
+                    self.dot_tmp += 1
+                    ios.print_set(f"【!】dot now is: {self.dot_tmp}", content='SYSTEM')
+                    if self.dot_tmp > self.dot_limit:
+                        self.dot_tmp = 0
+                        ios.print_set("dot reset", content='SYSTEM')
+                        await self.auto_reply(self.auto_msg)
+
+            if self.debug_flag:
+                self.debug_limit_tmp += 1
+                if self.debug_limit_tmp % (self.debug_limit / 10) == 0:
+                    ios.print_set(f"[SYSTEM][DEBUG_TMP]{self.debug_limit_tmp}", content="SYSTEM")
+                if self.debug_limit_tmp > self.debug_limit:
+                    # self.room_danmaku.remove_event_listener(name="DANMU_MSG", handler=)
+                    # sync(self.room_danmaku.disconnect())
+                    ios.print_set("[SYSTEM]exit", content="SYSTEM")
+                    sys.exit()
 
             user_fans_info = live_info[3]  # list[lvl, worn_badge, Unknown:]
             if len(user_fans_info) != 0:
-                print_flag = 'FANS'
                 if user_fans_info[1] == self.fans_badge:
+                    print_flag = 'FANS'
                     user_fans_lvl = user_fans_info[0]
                     if user_fans_lvl > 20:
                         print_flag = 'CAPTAIN'
@@ -162,12 +179,12 @@ class LiveInfoGet:
             ios.print_set(f'[{trans_time}][{user_fans_lvl}:{user_title}]{nickname}:{danmaku_content}',
                           content=print_flag)
 
-        @self.room.on('SEND_GIFT')
+        @self.room_danmaku.on('SEND_GIFT')
         async def on_gift(event):
             # 收到礼物
             pass
 
-        sync(self.room.connect())
+        sync(self.room_danmaku.connect())
 
     def timestamp_to_Beijing_time(self, timestamp):
 

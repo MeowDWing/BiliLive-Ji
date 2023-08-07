@@ -1,4 +1,39 @@
 # 更新日志
+## 2023.8.7 #1
+**特别注意**
+* 发现了一个cmd的bug，该bug会导致：
+    * 在win10的cmd中，用于调整颜色的逃逸字符\033颜色会错误的输出为乱码
+    * 目前的解决方案是在使用\033前加入os.system("cls")
+    * 在没找到具体解决方案前，将暂时使用上述方式解决，如果你不想清理，请将LiveInfoGet的初始化中加入参数（cls_flag=True）
+
+**新增内容**
+* 新增sender.py，允许直接在cmd窗口发送弹幕。（需要配置credential,方式见README）
+  * 你可以通过如下方式配置
+    ```python
+    import sender
+    x = sender.SenderCMD(rid=room_id, uid=uid, 
+                        cls_flag=False  # 为解决特别注意里的bug设置
+                        )
+    x.send_room()
+    # sender.py也配置了main函数，可以直接在里面改           
+    ```
+  * 你也可以在sender.py里直接配置main函数，然后直接：
+    ```commandline
+    python sender.py
+    ```
+* 为liveGetInfo类初始化新增debug参数，现在可以进行简单的debug，以后会进一步增加debug内容
+
+**Bug修复**
+* 修复了当粉丝牌不是本直播间的牌子时，也会被认为是FANS并设置错误的弹幕颜色的bug
+* 修复了即便没有设置reply_flag，也会在满足条件时尝试reply的bug
+* 在.gitignore 增加了一些无用的测试用文件
+
+**目前发现的其他还未处理的bug**
+* 有时弹幕会反向显示（直播间是正常的）
+* 有时弹幕会在中间突然出现颜色显示问题
+* 以上这些问题还未能复现，正在追踪
+
+
 ## 2023.8.6 #2
 * 更改 .gitignore 来忽略一些不必要的文件
 
