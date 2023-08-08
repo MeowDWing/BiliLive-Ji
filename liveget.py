@@ -1,9 +1,11 @@
 # import bilibili_api as bapi
-import os, sys
+import os
+import sys
 import iosetting as ios
 import bilibili_api
 from bilibili_api import live, sync, user, exceptions
 import datetime
+import get_from_web as gfw
 
 
 # Exception Zone
@@ -24,7 +26,7 @@ class LiveInfoGet:
     other classes/functions
     """
 
-    def __init__(self, user_id: int = -1, room_id: int = -1,  # id zone
+    def __init__(self, uid: int = -1, rid: int = -1,  # id zone
                  up_name: str = '资深小狐狸', crtl_name: str = '吾名喵喵之翼', auto_msg='。',  # str zone
                  reply_flag: bool = False, cls_flag: bool = False, debug_flag: bool = False,  # flag zone
                  dot_limit: int = 100  # limit zone
@@ -34,18 +36,20 @@ class LiveInfoGet:
 
         you can Enter any of these parameter or not all of them
 
-        :param user_id: get in homepage(e.g. https://space.bilibili.com/3117538/ is 3117538)
-        :param room_id: live room id which is got in live homepage(e.g. https://live.bilibili.com/34162 is 34162)
+        :param uid: get in homepage(e.g. https://space.bilibili.com/3117538/ is 3117538)
+        :param rid: live room id which is got in live homepage(e.g. https://live.bilibili.com/34162 is 34162)
         :param up_name(str): up名，默认是资深小狐狸 / UP name, default is 资深小狐狸
-        :param crtl_name: 控制用户的发言会设为亮青色，你可以设置成你的去高亮你的发言 / controller name, you can set to yourself to highlight your Danmaku
+        :param crtl_name: 控制用户的发言会设为亮青色，你可以设置成你的去高亮你的发言 /
+                            controller name, you can set to yourself to highlight your Danmaku
         :param auto_msg: 自定义回复内容 / customize your reply danmaku
-        :param reply_flag: 回复标记，True的话开启自动回复功能，目前只适配资深小狐狸的，当然以后会有自定义方式来回复 / if the flag is True, auto reply will on
+        :param reply_flag: 回复标记，True的话开启自动回复功能，目前只适配资深小狐狸的，当然以后会有自定义方式来回复 /
+                            if the flag is True, auto reply will on
         :param cls_flag: 清屏标记，该标记用于处理win10中cmd转义字符错误的临时标记，为True时启用
         :param dot_limit: 每dot_limit个中文句号，就自动回复一次 / every dot_limit CN full stop, reply once auto_msg
         """
         # parameter initial zone
-        self.room_id = room_id
-        self.user_id = user_id
+        self.room_id = rid
+        self.user_id = uid
         self.up_name = up_name
         self.ctrl_name = crtl_name
         self.dot_limit = dot_limit
@@ -53,24 +57,18 @@ class LiveInfoGet:
         self.debug_flag = debug_flag
         self.debug_limit = 1000
 
-        self.SESSDATA = -1
-        self.bili_jct = -1
-        self.buvid3 = -1
-        self.dedeuserid = -1
-
         self.reply_flag = reply_flag
         if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
             os.system("cls")
-
 
         # dictionary & list initial zone
         #   badge_dict
         self.badge_dict = {0: 'Passer'}
         self.badge_dict.update({
-            lvl: 'Fans' for lvl in range(1,21)
+            lvl: 'Fans' for lvl in range(1, 21)
         })
         self.badge_dict.update({
-            lvl: 'Captain' for lvl in range(21,50)
+            lvl: 'Captain' for lvl in range(21, 50)
         })
         #   general_list
         # tmp zone
@@ -92,38 +90,18 @@ class LiveInfoGet:
         else:
             raise UserInfoError("User_id maybe wrong, please check again")
 
+        # living room cover get
+        # gfw.get_dl_files(url=self.room_info['room_info']['cover'])
+
+
         # environment param. initial zone
-        if self.reply_flag:  # 之后会改成函数
-            address_file = open(r'.\address.txt', mode='r')
-            address_file = address_file.readlines()
-            address = address_file[0].strip()
-            # address.txt
-            # the address of environments parameters
-            # bililive.param
-            # SESSDATA=xxxx
-            # bili_jct=xxxx
-            # 如果只使用自动回复功能，只配置这两个即可
-            # 详细用法见README.MD
-            param_file = open(address, mode='r')
-            file_lines = param_file.readlines()
-            print(file_lines)
-            lines_len = len(file_lines)
-            for i in range(lines_len):
-                file_line = file_lines[i].strip().split('=')
-                print(file_line)
-                match file_line[0]:
-                    case 'SESSDATA': self.SESSDATA = file_line[1]
-                    case 'bili_jct': self.bili_jct = file_line[1]
-                    case 'buvid3': self.buvid3 = file_line[1]
-                    case 'dedeuserid': self.dedeuserid = file_line[1]
-                    case _: print('Undefined parameter(s)')
-            self.credential = bilibili_api.Credential(sessdata=self.SESSDATA, bili_jct=self.bili_jct)
-            self.sender = live.LiveRoom(self.room_id, credential=self.credential)
-        else:
-            pass
+        if self.reply_flag:  # reply_flag = True 时，需要配置环境变量
+            self.sender = self.reply_initial()
+            self.auto_reply('test')
+
+        self.room_danmaku = live.LiveDanmaku(self.room_id)
 
     def live_danmaku(self):
-        self.room_danmaku = live.LiveDanmaku(self.room_id)
 
         @self.room_danmaku.on('DANMU_MSG')
         async def on_danmaku(event):  # event -> dictionary
@@ -141,20 +119,20 @@ class LiveInfoGet:
             if self.reply_flag:
                 if danmaku_content == '。':
                     self.dot_tmp += 1
-                    ios.print_set(f"【!】dot now is: {self.dot_tmp}", content='SYSTEM')
+                    ios.print_set(f"【!】dot now is: {self.dot_tmp}", tag='SYSTEM')
                     if self.dot_tmp > self.dot_limit:
                         self.dot_tmp = 0
-                        ios.print_set("dot reset", content='SYSTEM')
+                        ios.print_set("dot reset", tag='SYSTEM')
                         await self.auto_reply(self.auto_msg)
 
             if self.debug_flag:
                 self.debug_limit_tmp += 1
                 if self.debug_limit_tmp % (self.debug_limit / 10) == 0:
-                    ios.print_set(f"[SYSTEM][DEBUG_TMP]{self.debug_limit_tmp}", content="SYSTEM")
+                    ios.print_set(f"[SYSTEM][DEBUG_TMP]{self.debug_limit_tmp}", tag="SYSTEM")
                 if self.debug_limit_tmp > self.debug_limit:
                     # self.room_danmaku.remove_event_listener(name="DANMU_MSG", handler=)
                     # sync(self.room_danmaku.disconnect())
-                    ios.print_set("[SYSTEM]exit", content="SYSTEM")
+                    ios.print_set("[SYSTEM]exit", tag="SYSTEM")
                     sys.exit()
 
             user_fans_info = live_info[3]  # list[lvl, worn_badge, Unknown:]
@@ -177,12 +155,12 @@ class LiveInfoGet:
             # print_content:
             #       [timestamp][lvl:badge]Nickname:Says
             ios.print_set(f'[{trans_time}][{user_fans_lvl}:{user_title}]{nickname}:{danmaku_content}',
-                          content=print_flag)
+                          tag=print_flag)
 
-        @self.room_danmaku.on('SEND_GIFT')
-        async def on_gift(event):
-            # 收到礼物
-            pass
+        # @self.room_danmaku.on('SEND_GIFT')
+        # async def on_gift(event):
+        #     # 收到礼物
+        #     pass
 
         sync(self.room_danmaku.connect())
 
@@ -201,18 +179,43 @@ class LiveInfoGet:
     #     @self.room.on('DANMU_MSG')
     #     async def msg_get(event):
 
+    def reply_initial(self):
+        SESSDATA = -1
+        bili_jct = -1
+
+        address_file = open(r'.\address.txt', mode='r')
+        address_file = address_file.readlines()
+        address = address_file[0].strip()
+        # address.txt
+        # the address of environments parameters
+        # bililive.param
+        # SESSDATA=xxxx
+        # bili_jct=xxxx
+        # 如果只使用自动回复功能，只配置这两个即可
+        # 详细用法见README.MD
+        param_file = open(address, mode='r')
+        file_lines = param_file.readlines()
+        print(file_lines)
+        lines_len = len(file_lines)
+        for i in range(lines_len):
+            file_line = file_lines[i].strip().split('=')
+            print(file_line)
+            match file_line[0]:
+                case 'SESSDATA': SESSDATA = file_line[1]
+                case 'bili_jct': bili_jct = file_line[1]
+                case _:
+                    ios.print_set('[REPLY MODULE]Undefined or Unused parameter(s)', tag='SYSTEM')
+        credential = bilibili_api.Credential(sessdata=SESSDATA, bili_jct=bili_jct)
+        sender = live.LiveRoom(self.room_id, credential=credential)
+        return sender
+
     async def auto_reply(self, msg: str):
         try:
             await self.sender.send_danmaku(bilibili_api.Danmaku(msg))
-            ios.print_set("[!]successfully reply", content='SUCCESS')
+            ios.print_set("[!]successfully reply", tag='SUCCESS')
         except exceptions.ResponseCodeException:  # 登录信息有误也是这个错误，所以不一定是弹幕发送过快，以后会加以区分
-            ios.print_set('[WARNING]弹幕发送过快', content='WARNING')
+            ios.print_set('[WARNING]弹幕发送过快', tag='WARNING')
         finally:
-            ios.print_set('auto_reply 结束', content='SYSTEM')
-
-
+            ios.print_set('auto_reply 结束', tag='SYSTEM')
         # await self.sender.send_danmaku(bilibili_api.Danmaku(msg))
         # ios.print_set("[!]successfully reply", content='SUCCESS')
-
-
-

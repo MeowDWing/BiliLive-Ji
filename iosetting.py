@@ -5,10 +5,10 @@ WHITE = 0x000000
 BLACK = 0xFFFFFF
 
 
-def print_set(text: str, content: str = 'NORMAL'):
+def print_set(text: str, tag: str = 'NORMAL', debug_flag: bool = False):
     begin_str = ''
     end_str = '\033[0m'
-    match content:
+    match tag:
         case 'SYSTEM': begin_str = '\033[91m'  # Red bright
         case 'ERROR': begin_str = '\033[41m'  # Red bottom
         case 'WARNING': begin_str = '\033[43m'  # Yellow bottom
@@ -19,7 +19,16 @@ def print_set(text: str, content: str = 'NORMAL'):
         case 'CAPTAIN': begin_str = '\033[94m'  # Blue bright
         case 'NORMAL': begin_str = '\033[90m'  # Gray
         case _: end_str = ''
+    # print format:
+    # color_CTRL head prefix text suffix color_CTRL_end
+    # \033[xxm[HEAD->PREFIX]TEXT[SUFFIX]\033[m
+    # \033[91m[SYSTEM->REPLY MODULE]xxxxxxxxx\033[m
     print(begin_str, end='')
     print(text, end='')
     print(end_str)
+
+
+def print_head():
+    pass
+
 

@@ -7,7 +7,8 @@ import subprocess_init as smp
 
 
 def main():
-    pass
+    x = lg.LiveInfoGet(rid=34162,reply_flag=True)
+    x.live_danmaku()
     # # initial zone
     # process_list = []
     # shared_danmaku_dict = mp.Manager.dict()

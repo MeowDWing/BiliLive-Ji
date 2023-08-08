@@ -48,7 +48,7 @@ Update date：2023.8.7
 ```python
 import liveget as lg
 
-live_room = lg.LiveInfoGet(room_id=34162)  # 实例化直播资料获取对象
+live_room = lg.LiveInfoGet(rid=34162)  # 实例化直播资料获取对象
 live_room.live_danmaku()  # 开启直播流
 #   格式：
 #   [时间戳][等级:名号]昵称:内容
@@ -106,7 +106,7 @@ Up to now, there is only one function which is get danmuku
 ```python
 import liveget as lg
 
-live_room = lg.LiveInfoGet(room_id=34162)  # creat an instance
+live_room = lg.LiveInfoGet(rid=34162)  # creat an instance
 live_room.live_danmaku()  # open danmaku streaming
 ```
 -------
