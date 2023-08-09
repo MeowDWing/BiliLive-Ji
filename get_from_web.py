@@ -7,6 +7,8 @@ import iosetting as ios
 
 def get_dl_files(url: str='None',name: str='rid') -> str:
     """
+
+    :param url:str the url link
     :return (str) -1:no url input; -2: error url; file_name: file_name has been downloaded
     """
     if url != 'None':

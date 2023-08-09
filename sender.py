@@ -3,11 +3,19 @@ import bilibili_api
 from bilibili_api import live, sync, exceptions
 import iosetting as ios
 import os
+import sys
+
+SENDER_COMMANDLINE_SEQUENCE = {
+    'cls': "os.system('cls')",
+    'exit': "sys.exit()",
+}
+
 
 class SenderCMD:
     def __init__(self, rid: int = 34162, uid: int = -1,
                  cls_flag=False,
-                 place=None):
+                 place=None
+                 ):
         self.rid = rid
         self.uid = uid
         if cls_flag:
@@ -45,21 +53,21 @@ class SenderCMD:
         while True:
             send_msg = input(">>>")
             if len(send_msg) > 20:
-                ios.print_set("[WARNING]长度超过20个字符，需重新输入", tag="WARNING")
-            elif send_msg.strip() == 'cls':
-                os.system("cls")
+                ios.print_set("长度超过20个字符，需重新输入", tag="WARNING")
+            elif send_msg.strip() in SENDER_COMMANDLINE_SEQUENCE:
+                exec(SENDER_COMMANDLINE_SEQUENCE[send_msg.strip()])
             else:
                 try:
                     sync(self.send_room.send_danmaku(bilibili_api.Danmaku(send_msg)))
-                    ios.print_set("[!]successfully reply", tag='SUCCESS')
+                    ios.print_set("successfully reply", tag='SUCCESS')
                 except exceptions.ResponseCodeException:  # 登录信息有误也是这个错误，所以不一定是弹幕发送过快，以后会加以区分
-                    ios.print_set('[WARNING]弹幕发送过快', tag='WARNING')
+                    ios.print_set('弹幕发送过快', tag='WARNING')
                 finally:
                     ios.print_set('auto_reply 结束', tag='SYSTEM')
 
 
 def main():
-    x = SenderCMD(cls_flag=True)
+    x = SenderCMD()
     x.sender()
 
 

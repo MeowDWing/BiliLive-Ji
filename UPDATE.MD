@@ -1,4 +1,44 @@
 # 更新日志
+## 2023.8.9 #1
+**特别注意**
+* 为了最好的使用体验，建议使用Windows Terminal而不是控制台主机，你可以再微软商城直接搜索下载Windows Terminal，如果你是win11，则最新版自带了WT，如果你是win8或更早的版本，则建议在初始化类时将cls_flag设为True
+
+
+**新增内容**
+* 新增弹幕流礼物板块，现在，可以选择打开礼物流了
+  * 你可以通过参数gift_flag=True打开礼物流（默认关闭）
+      ```python
+        import liveget as lg
+        x = lg.LiveInfoGet(rid=34162)
+        x.living_on(gift_flag=True) 
+      ```
+  * 礼物的标记颜色默认为亮淡黄色
+* 现在，可以通过设置参数来控制某个模块的开启、关闭
+  * ```python
+    import liveget as lg
+    x = lg.LiveInfoGet(rid=34162)
+    x.living_on( # 默认配置如下
+        danmaku_flag=True, gift_flag=False,  # main
+        sc_flag=False, guard_buy_flag=False,   # important
+        gift_combo_flag=False, enter_flag=False,  # secondary
+        sys_notice_flag=False,  # may need
+        sc_jpn_flag=False  # never need  
+    )
+    ```
+* 现在，输出设置自带的为一些特殊的tag配置来源前缀
+* InfoText里增加了gift的event字典
+
+
+**重构内容**
+* 对LiveInfoGet类中的live_danmaku函数进行了重构
+  * 现在，其所有功能由living_on函数代替
+  * live_danmaku在以后将专门作为弹幕的处理函数使用，而living_on用以控制所有直播间信息的开启与否
+
+
+**Bug修复**
+* 纠正了注释文件中的说明错误
+
+
 ## 2023.8.8 #1
 
 **新增内容**

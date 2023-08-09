@@ -18,7 +18,7 @@ Update date：2023.8.7
 
 1,根据直播间号或空间号连接直播间,并显示弹幕（见例子）
 
-2,在资深小狐狸的直播间自动参加将军抽奖（需要配置环境变量）
+2,在资深小狐狸的直播间自动参加将军抽奖（需要配置文件）
 
 ### 后续可能的功能
 1：弹幕抽奖
@@ -49,7 +49,7 @@ Update date：2023.8.7
 import liveget as lg
 
 live_room = lg.LiveInfoGet(rid=34162)  # 实例化直播资料获取对象
-live_room.live_danmaku()  # 开启直播流
+live_room.living_on()  # 开启直播流
 #   格式：
 #   [时间戳][等级:名号]昵称:内容
 #   其中，
@@ -71,7 +71,7 @@ live_room = lg.LiveInfoGet(room_id=34162, reply_flag=True)
 # 位置在liveget.py的environment param. zone代码段
 #
 # 之后，打开直播流
-live_room.live_danmaku()
+live_room.living_on()
 # 即可自动开启回复功能，每当接收到其他人输入的100个句号，则发送一个句号
 ```
 
@@ -107,7 +107,7 @@ Up to now, there is only one function which is get danmuku
 import liveget as lg
 
 live_room = lg.LiveInfoGet(rid=34162)  # creat an instance
-live_room.live_danmaku()  # open danmaku streaming
+live_room.living_on()  # open danmaku streaming
 ```
 -------
 I will finish more functions in the future

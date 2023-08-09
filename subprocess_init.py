@@ -23,7 +23,7 @@ class SubGetDanmaku(mp.Process):
 
     def run(self) -> None:
         get_room = lg.LiveInfoGet(rid=self.room_id, uid=self.uid)
-        get_room.live_danmaku()
+        get_room.living_on()
 
 
 
