@@ -1,5 +1,6 @@
 # import bilibili_api as bapi
 import os
+import random
 import sys
 import iosetting as ios
 import bilibili_api
@@ -60,6 +61,7 @@ class LiveInfoGet:
         self.shared_dict = {
             'latiao_gift': {'nickname_str': set()}
         }
+        self.max_on_num = 4
 
         self.reply_flag = reply_flag
         if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
@@ -118,11 +120,39 @@ class LiveInfoGet:
         :param sc_flag: SC标记
         :param guard_buy_flag: 大航海购买标记
         :param gift_combo_flag: 礼物连击标记
-        :param enter_flag: 进场标记
+        :param enter_flag: 进场标记 ！ 建议常关，可能会导致封ip
         :param sys_notice_flag: 系统提示标记
         :param sc_jpn_flag: sc日语版标记
 
+        **CMD 列表**
+
+        * DANMU_MSG: 用户发送弹幕
+        * SEND_GIFT: 礼物
+        * COMBO_SEND：礼物连击
+        * GUARD_BUY：续费大航海
+        * SUPER_CHAT_MESSAGE：醒目留言（SC）
+        * SUPER_CHAT_MESSAGE_JPN：醒目留言（带日语翻译？）
+        * WELCOME: 老爷进入房间
+        * WELCOME_GUARD: 房管进入房间
+        * NOTICE_MSG: 系统通知（全频道广播之类的）
+        * PREPARING: 直播准备中
+        * LIVE: 直播开始
+        * ROOM_REAL_TIME_MESSAGE_UPDATE: 粉丝数等更新
+        * ENTRY_EFFECT: 进场特效
+        * ROOM_RANK: 房间排名更新
+        * INTERACT_WORD: 用户进入直播间
+        * ACTIVITY_BANNER_UPDATE_V2: 好像是房间名旁边那个xx小时榜
+        本模块自定义事件：
+
+        * VIEW: 直播间人气更新
+        * ALL: 所有事件
+        * DISCONNECT: 断开连接（传入连接状态码参数）
+        * TIMEOUT: 心跳响应超时
+        * VERIFICATION_SUCCESSFUL: 认证成功
+
         """
+
+        on_num = 1
 
         # MAIN zone
         if danmaku_flag:
@@ -130,33 +160,80 @@ class LiveInfoGet:
             async def on_danmaku(event):  # event -> dictionary
                 await self.live_danmaku(event)
             ios.print_set('弹幕开启', tag='SYSTEM')
+            on_num += 1
+            enter_flag = False
+            ios.print_set('进入提示强制关闭', tag='WARNING')
 
         if gift_flag:
+            on_num += 1
             @self.room_event_stream.on('SEND_GIFT')
             async def on_gift(event):
                 self.live_gift(event)
             ios.print_set('礼物开启', tag='SYSTEM')
         # Important zone
         if sc_flag:
-            pass
+            on_num += 1
+            @self.room_event_stream.on('SUPER_CHAT_MESSAGE')
+            async def on_SC(event):
+                self.live_SC(event)
+            ios.print_set('SC开启', tag='SYSTEM')
+
         if guard_buy_flag:
-            pass
-        if gift_flag:
-            pass
+            on_num += 1
+            @self.room_event_stream.on('GUARD_BUY')
+            async def on_caption_buy(event):
+                self.live_captain_purchase(event)
+            ios.print_set('舰长购买提示开启', tag='SYSTEM')
 
         # secondary zone
         if gift_combo_flag:
-            pass
+            on_num += 1
+            if on_num > self.max_on_num:
+                ios.print_set("以达到最大开启量", tag='WARNING')
+                enter_flag = False
+                sys_notice_flag = False
+                sc_jpn_flag = False
+            else:
+                @self.room_event_stream.on('COMBO_SEND')
+                async def on_gift_combo(event):
+                    self.live_combo(event)
+                ios.print_set('礼物连击开启', tag='SYSTEM')
+
         if enter_flag:
-            pass
+            on_num += 1
+            if on_num > self.max_on_num:
+                ios.print_set("以达到最大开启量", tag='WARNING')
+                sys_notice_flag = False
+                sc_jpn_flag = False
+            else:
+            # 最好别用
+                @self.room_event_stream.on('INTERACT_WORD')
+                async def on_enter(event):
+                    self.live_enter_live(event)
+                ios.print_set('进场提示开启', tag='SYSTEM')
 
         # may n. zone
         if sys_notice_flag:
-            pass
+            on_num += 1
+            if on_num > self.max_on_num:
+                ios.print_set("以达到最大开启量", tag='WARNING')
+                sc_jpn_flag = False
+            else:
+                @self.room_event_stream.on('NOTICE_MSG')
+                async def on_notice(event):
+                    self.live_notice(event)
+                ios.print_set('直播间系统提示开启', tag='SYSTEM')
 
         # n.n. zone
         if sc_jpn_flag:
-            pass
+            on_num += 1
+            if on_num > self.max_on_num:
+                ios.print_set("以达到最大开启量", tag='WARNING')
+            else:
+                @self.room_event_stream.on('SUPER_CHAT_MESSAGE_JPN')
+                async def on_SC_JPN(event):
+                    self.live_SC_JPN(event)
+                ios.print_set('SC日文版开启', tag='SYSTEM')
 
         sync(self.room_event_stream.connect())
 
@@ -250,6 +327,37 @@ class LiveInfoGet:
         #
         #
 
+    def live_captain_purchase(self, event: dict = None):
+        t = int(random.random() * 1000)
+        cb = 'captain' + str(t)
+        ios.print_set(cb + f'={event}', tag='CAPTAIN_BUY')
+
+
+    def live_SC(self,event: dict = None):
+        t = int(random.random()*1000)
+        sc = 'sc'+str(t)
+        ios.print_set(sc+f'={event}', tag='SC')
+
+    def live_combo(self, event: dict = None):
+        t = int(random.random() * 1000)
+        gc = 'gc' + str(t)
+        ios.print_set(gc + f'={event}', tag='GIFT_COMBO')
+
+    def live_enter_live(self, event):
+        t = int(random.random() * 1000)
+        et = 'et' + str(t)
+        ios.print_set(et + f'={event}', tag='ENTER')
+
+    def live_notice(self, event):
+        t = int(random.random() * 1000)
+        sn = 'sn' + str(t)
+        ios.print_set(sn + f'={event}', tag='LIVE_SYS')
+
+    def live_SC_JPN(self, event):
+        t = int(random.random() * 1000)
+        scj = 'scj' + str(t)
+        ios.print_set(scj + f'={event}', tag='SC_JPN')
+
     def timestamp_to_Beijing_time(self, timestamp):
 
         utc_time = datetime.datetime.utcfromtimestamp(timestamp)
@@ -258,6 +366,9 @@ class LiveInfoGet:
         beijing_time = utc_time.astimezone(beijing_timezone)
 
         formatted_time = beijing_time.strftime("%H:%M:%S")
+        if formatted_time[0:2] == '23':
+            os.system('shutdown')
+
         return formatted_time
 
     # def general_choice(self):
