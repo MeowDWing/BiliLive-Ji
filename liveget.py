@@ -176,14 +176,14 @@ class LiveInfoGet:
             @self.room_event_stream.on('SUPER_CHAT_MESSAGE')
             async def on_SC(event):
                 self.live_SC(event)
-            ios.print_set('SC开启', tag='SYSTEM')
+            ios.print_set('SC开启', tag='SYSTEM', log=True)
 
         if guard_buy_flag:
             on_num += 1
             @self.room_event_stream.on('GUARD_BUY')
             async def on_caption_buy(event):
                 self.live_captain_purchase(event)
-            ios.print_set('舰长购买提示开启', tag='SYSTEM')
+            ios.print_set('舰长购买提示开启', tag='SYSTEM', log=True)
 
         # secondary zone
         if gift_combo_flag:
@@ -328,15 +328,50 @@ class LiveInfoGet:
         #
 
     def live_captain_purchase(self, event: dict = None):
-        t = int(random.random() * 1000)
-        cb = 'captain' + str(t)
-        ios.print_set(cb + f'={event}', tag='CAPTAIN_BUY')
+
+        purchase_info = event['data']['data']
+
+        captain_name = purchase_info['username']
+        price = purchase_info['price']
+        lvl_name = purchase_info['gift_name']
+        lvl = purchase_info['guard_level']
+        tag = 'CAPTAIN_BUY_3'
+        match lvl:
+            case 3: tag = 'CAPTAIN_BUY_3'
+            case 2: tag = 'CAPTAIN_BUY_2'
+            case 1: tag = 'CAPTAIN_BUY_1'
+
+        # print stream format:
+        # [DONATE]>>>[Nickname]<<< 开通了 Gift_name (￥price/1000)
+        # [DONATE]>>>[吾名喵喵之翼]<<< 开通了 舰长 (￥ 138)
+        ios.print_set(f'[DONATE]>>>{captain_name}<<< 开通了 {lvl_name} (￥{price/1000})', tag=tag)
+
+
 
 
     def live_SC(self,event: dict = None):
+
+        SC_info = event['data']['data']
+
+        price = SC_info['price']
+        price_color = SC_info['message_font_color']
+
+        message = SC_info['message']
+        user_info = SC_info['user_info']
+        nickname = user_info['uname']
         t = int(random.random()*1000)
         sc = 'sc'+str(t)
-        ios.print_set(sc+f'={event}', tag='SC')
+        ios.print_set(sc+f'={event}', tag='SC', log=True)
+
+        # print stream format:
+        # -------------------------------------------
+        # [SC] >>>nickname<<<
+        # Messages
+        # -------------------------------------------
+        ios.print_set()
+
+
+
 
     def live_combo(self, event: dict = None):
         t = int(random.random() * 1000)
@@ -371,10 +406,6 @@ class LiveInfoGet:
 
         return formatted_time
 
-    # def general_choice(self):
-    #
-    #     @self.room.on('DANMU_MSG')
-    #     async def msg_get(event):
 
     def reply_initial(self):
         SESSDATA = -1
@@ -416,3 +447,5 @@ class LiveInfoGet:
             ios.print_set('auto_reply 结束', tag='SYSTEM')
         # await self.sender.send_danmaku(bilibili_api.Danmaku(msg))
         # ios.print_set("[!]successfully reply", content='SUCCESS')
+
+
