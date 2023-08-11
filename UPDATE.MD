@@ -1,4 +1,23 @@
 # 更新日志
+## 2023.8.11 #1
+**特别注意**
+* api已找到临时解决方案，在bilibili_api/live.py中，具体解决方案请等待包更新
+  * ```
+    --- a/bilibili_api/live.py
+    +++ b/bilibili_api/live.py
+    @@ -960,7 +960,7 @@ class LiveDanmaku(AsyncEvent):
+             self.logger.info(f"正在尝试连接主机： {uri}")
+
+             try:
+    -                async with session.ws_connect(uri) as ws:
+    +                async with session.ws_connect(uri, headers={"User-Agent": "Mozilla/5.0"}) as ws:
+
+                         @self.on("VERIFICATION_SUCCESSFUL")
+                         async def on_verification_successful(data):
+
+    ```
+
+
 ## 2023.8.10 #2
 **特别注意**
 * 经确认，应该不是风控的问题，是api的问题（或者b站抽风），暂时未查明具体原因，下次更新将在抽风结束后稳步开始
