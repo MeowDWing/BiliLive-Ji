@@ -312,7 +312,7 @@ class LiveInfoGet:
                 name_str = ''
                 for i in self.shared_dict['latiao_gift']['nickname_str']:
                     name_str += i + '、'
-                nickname = name_str
+                nickname = name_str[:-1]
             else:
                 return
 
@@ -359,19 +359,16 @@ class LiveInfoGet:
         message = SC_info['message']
         user_info = SC_info['user_info']
         nickname = user_info['uname']
-        t = int(random.random()*1000)
-        sc = 'sc'+str(t)
-        ios.print_set(sc+f'={event}', tag='SC', log=True)
 
         # print stream format:
         # -------------------------------------------
-        # [SC] >>>nickname<<<
+        # [SC] >>>nickname<<<   ￥price
         # Messages
         # -------------------------------------------
-        ios.print_set()
-
-
-
+        ios.print_set("-------------------------------------------\n"
+                      f"[SC]>>>{nickname}<<<  ￥{price}\n"
+                      f"{message}\n"
+                      "-------------------------------------------", tag='SC', special_color=price_color,log=True)
 
     def live_combo(self, event: dict = None):
         t = int(random.random() * 1000)

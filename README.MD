@@ -1,7 +1,7 @@
 # BiliLive-Ji
 本文件每周末更新，若未发布最新版，请移步UPDATE.MD查看更新内容
 
-Update date：2023.8.7
+Update date：2023.8.12
 ## zh-CN
 这是一个学习用项目（练手的，没啥实际使用价值），如果您有什么问题或任何针对代码的建议与问题，欢迎在issue里提问。
 
@@ -13,31 +13,20 @@ Update date：2023.8.7
 
 
 ### 目前的功能
+**目前，本项目仍然只是一个库的形式，未来会拓展成一个应用**
 
-**！！！目前，main函数还没完成，所以需要自己去写main或者直接用命令行！！！**
+* 根据直播间号或uid连接直播间,监听直播间大部分信息
+* 在资深小狐狸直播间自动参与将军抽奖*
+* 发送弹幕*
+> 注意：带*号的功能需要配置cookie并手动更新
 
-1,根据直播间号或空间号连接直播间,并显示弹幕（见例子）
+### 更新计划
 
-2,在资深小狐狸的直播间自动参加将军抽奖（需要配置文件）
-
-### 后续可能的功能
-1：弹幕抽奖
-
-2：自动参与抽奖
-
-3：...
-
-### 目前的实现思路
-目前是有几个思路来实现之后的功能，
-
-一个是多进程，通过Pipe来实现进程间通信，分为
-弹幕子进程和抽奖子进程，然后当抽奖进程由主进程控制，中断传入（就是用await）指令
-开启抽奖模式，开启后弹幕子进程每收到一个弹幕便判断一次牌子/等级或者内容，然后将符合条件的人的名字
-以字典或者列表的形式传回抽奖子进程，子进程再收到下一次主进程给出的end指令后返回字典/列表，之后再写一个抽奖代码完成抽奖
-
-第二个就是干脆直接用多个程序，主程序只负责用os.startfile打开子程序，子程序间通过UDP实现本机通信，剩余思路就跟上面一样了。
-
-最后一个就是完全由一个程序来跑，完全靠异步实现，这个我不知道是简单还是难，得写写试试才知道。
+* 在alpha版本到来时，形成一个基于cmd的弹幕姬应用
+* 在beta版到来时，完成弹幕姬所有功能
+* 在第一个正式版本到来时，做到一个可以供个人使用的项目
+* 2.0版本到来时，完成基于web的可视化
+* 3.0版本到来时，完成完整的可视化界面
 
 -----
 
@@ -47,15 +36,10 @@ Update date：2023.8.7
 
 ```python
 import liveget as lg
-
-live_room = lg.LiveInfoGet(rid=34162)  # 实例化直播资料获取对象
-live_room.living_on()  # 开启直播流
-#   格式：
-#   [时间戳][等级:名号]昵称:内容
-#   其中，
-#   时间戳： 时:分:秒
-#   等级： 佩戴当前直播间牌子时，即牌子等级，否则为0
-#   名号： 当等级为0时，是passer；小于21时，为Fans；大于21为Captain
+x = lg.LiveInfoGet(rid=34162, reply_flag=False)
+x.living_on(danmaku_flag=True, gift_flag=False, guard_buy_flag=True,
+             sc_flag=True,gift_combo_flag=False, enter_flag=False, sys_notice_flag=False,
+                sc_jpn_flag=False)
 ```
 
 #### 在上述功能实现的前提下增加自动回复‘。’参加抽奖
@@ -71,8 +55,16 @@ live_room = lg.LiveInfoGet(room_id=34162, reply_flag=True)
 # 位置在liveget.py的environment param. zone代码段
 #
 # 之后，打开直播流
-live_room.living_on()
+live_room.living_on() # 不加参数时默认只打开弹幕监听
 # 即可自动开启回复功能，每当接收到其他人输入的100个句号，则发送一个句号
+```
+#### 手动发送弹幕
+```
+python sender.py
+REM 需要在sender.py中配置rid
+REM 内置cls与exit功能
+>>> cls   REM 清屏
+>>> exit  REM 退出sender.py
 ```
 
 其中，得到bililive.txt中参数信息的方式见：
@@ -83,18 +75,23 @@ https://nemo2011.github.io/bilibili-api/#/get-credential
 
 
 ## en
+
+Updated date: 2023/8/4
+
+**If updated date is far away from today, please read zh-CN README**
+
 This is a private repo based on bilibili-api-python by python 3.11.4
 
 This repo is just used for private study
 
-If you have any Question or advise, please propose an issue to make me know
+If you have any Question or Advise, please propose an issue to make me know
 , I'm very pleasant to see it.
 
 #### requirements:
 
 python 3.9+ | bilibili-api-python
 
-you can get it by 
+you can get the later by 
 
     pip install bilibili-api-python
 
