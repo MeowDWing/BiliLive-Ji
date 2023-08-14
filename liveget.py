@@ -57,9 +57,9 @@ class LiveInfoGet:
         self.auto_msg = auto_msg
         self.debug_flag = debug_flag
         self.debug_limit = 1000
-        self.shared_counter = 0
         self.shared_dict = {
-            'latiao_gift': {'nickname_str': set()}
+            'latiao_gift': {'nickname_str': set(), 'count': 0},
+            'enter_info': {'nn_str': set(), 'count': 0}
         }
         self.max_on_num = 4
 
@@ -152,7 +152,6 @@ class LiveInfoGet:
 
         """
 
-        on_num = 1
 
         # MAIN zone
         if danmaku_flag:
@@ -160,26 +159,22 @@ class LiveInfoGet:
             async def on_danmaku(event):  # event -> dictionary
                 await self.live_danmaku(event)
             ios.print_set('弹幕开启', tag='SYSTEM')
-            on_num += 1
-            enter_flag = False
-            ios.print_set('进入提示强制关闭', tag='WARNING')
+            # enter_flag = False
+            # ios.print_set('进入提示强制关闭', tag='WARNING')
 
         if gift_flag:
-            on_num += 1
             @self.room_event_stream.on('SEND_GIFT')
             async def on_gift(event):
                 self.live_gift(event)
             ios.print_set('礼物开启', tag='SYSTEM')
         # Important zone
         if sc_flag:
-            on_num += 1
             @self.room_event_stream.on('SUPER_CHAT_MESSAGE')
             async def on_SC(event):
                 self.live_SC(event)
             ios.print_set('SC开启', tag='SYSTEM', log=True)
 
         if guard_buy_flag:
-            on_num += 1
             @self.room_event_stream.on('GUARD_BUY')
             async def on_caption_buy(event):
                 self.live_captain_purchase(event)
@@ -187,53 +182,45 @@ class LiveInfoGet:
 
         # secondary zone
         if gift_combo_flag:
-            on_num += 1
-            if on_num > self.max_on_num:
-                ios.print_set("以达到最大开启量", tag='WARNING')
-                enter_flag = False
-                sys_notice_flag = False
-                sc_jpn_flag = False
-            else:
-                @self.room_event_stream.on('COMBO_SEND')
-                async def on_gift_combo(event):
-                    self.live_combo(event)
-                ios.print_set('礼物连击开启', tag='SYSTEM')
+            # ios.print_set("以达到最大开启量", tag='WARNING')
+            # enter_flag = False
+            # sys_notice_flag = False
+            # sc_jpn_flag = False
+            @self.room_event_stream.on('COMBO_SEND')
+            async def on_gift_combo(event):
+                self.live_combo(event)
+            ios.print_set('礼物连击开启', tag='SYSTEM')
 
         if enter_flag:
-            on_num += 1
-            if on_num > self.max_on_num:
-                ios.print_set("以达到最大开启量", tag='WARNING')
-                sys_notice_flag = False
-                sc_jpn_flag = False
-            else:
+            #     ios.print_set("以达到最大开启量", tag='WARNING')
+            #     sys_notice_flag = False
+            #     sc_jpn_flag = False
             # 最好别用
-                @self.room_event_stream.on('INTERACT_WORD')
-                async def on_enter(event):
-                    self.live_enter_live(event)
-                ios.print_set('进场提示开启', tag='SYSTEM')
+            @self.room_event_stream.on('INTERACT_WORD')
+            async def on_enter(event):
+                self.live_enter_live(event)
+            ios.print_set('进场提示开启', tag='SYSTEM')
 
         # may n. zone
         if sys_notice_flag:
-            on_num += 1
-            if on_num > self.max_on_num:
-                ios.print_set("以达到最大开启量", tag='WARNING')
-                sc_jpn_flag = False
-            else:
-                @self.room_event_stream.on('NOTICE_MSG')
-                async def on_notice(event):
-                    self.live_notice(event)
-                ios.print_set('直播间系统提示开启', tag='SYSTEM')
+
+                # ios.print_set("以达到最大开启量", tag='WARNING')
+                # sc_jpn_flag = False
+            @self.room_event_stream.on('NOTICE_MSG')
+            async def on_notice(event):
+                self.live_notice(event)
+            ios.print_set('直播间系统提示开启', tag='SYSTEM')
 
         # n.n. zone
         if sc_jpn_flag:
-            on_num += 1
-            if on_num > self.max_on_num:
-                ios.print_set("以达到最大开启量", tag='WARNING')
-            else:
-                @self.room_event_stream.on('SUPER_CHAT_MESSAGE_JPN')
-                async def on_SC_JPN(event):
-                    self.live_SC_JPN(event)
-                ios.print_set('SC日文版开启', tag='SYSTEM')
+            # on_num += 1
+            # if on_num > self.max_on_num:
+            #     ios.print_set("以达到最大开启量", tag='WARNING')
+            # else:
+            @self.room_event_stream.on('SUPER_CHAT_MESSAGE_JPN')
+            async def on_SC_JPN(event):
+                self.live_SC_JPN(event)
+            ios.print_set('SC日文版开启', tag='SYSTEM')
 
         sync(self.room_event_stream.connect())
 
@@ -306,13 +293,14 @@ class LiveInfoGet:
 
         if gift_name == '辣条':
             self.shared_dict['latiao_gift']['nickname_str'].add(nickname)
-            self.shared_counter += 1
-            if self.shared_counter > 10:
-                self.shared_counter = 0
+            self.shared_dict['latiao_gift']['count'] += 1
+            if self.shared_dict['latiao_gift']['count'] > 10:
+                self.shared_dict['latiao_gift']['count'] = 0
                 name_str = ''
                 for i in self.shared_dict['latiao_gift']['nickname_str']:
                     name_str += i + '、'
                 nickname = name_str[:-1]
+                self.shared_dict['latiao_gift']['nickname_str'].clear()
             else:
                 return
 
@@ -376,19 +364,33 @@ class LiveInfoGet:
         ios.print_set(gc + f'={event}', tag='GIFT_COMBO')
 
     def live_enter_live(self, event):
-        t = int(random.random() * 1000)
-        et = 'et' + str(t)
-        ios.print_set(et + f'={event}', tag='ENTER')
+
+        enter_info = event['data']['data']
+
+        nickname = enter_info['uname']
+        self.shared_dict['enter_info']['nn_str'].add(nickname)
+        self.shared_dict['enter_info']['count'] += 1
+        nstr = ''
+
+        if self.shared_dict['enter_info']['count'] > 100:
+            for nn in self.shared_dict['enter_info']['nn_str']:
+                nstr += nn + '、'
+            nstr = nstr[:-1]
+            self.shared_dict['enter_info']['count'] = 0
+            self.shared_dict['enter_info']['nn_str'].clear()
+            ios.print_set(f'欢迎{nstr}等进入直播间', tag='ENTER')
+        else:
+            pass
 
     def live_notice(self, event):
         t = int(random.random() * 1000)
         sn = 'sn' + str(t)
-        ios.print_set(sn + f'={event}', tag='LIVE_SYS')
+        ios.print_set(sn + f'={event}', tag='LIVE_SYS', log=True)
 
     def live_SC_JPN(self, event):
         t = int(random.random() * 1000)
         scj = 'scj' + str(t)
-        ios.print_set(scj + f'={event}', tag='SC_JPN')
+        ios.print_set(scj + f'={event}', tag='SC_JPN', log=True)
 
     def timestamp_to_Beijing_time(self, timestamp):
 

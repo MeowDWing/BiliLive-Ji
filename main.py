@@ -9,7 +9,7 @@ import subprocess_init as smp
 def main():
     x = lg.LiveInfoGet(rid=6136246, reply_flag=False)
     x.living_on(danmaku_flag=True, gift_flag=False, guard_buy_flag=True,
-                gift_combo_flag=False, enter_flag=False, sys_notice_flag=False,
+                gift_combo_flag=False, enter_flag=True, sys_notice_flag=False,
                 sc_jpn_flag=True, sc_flag=True)
     # # initial zone
     # process_list = []

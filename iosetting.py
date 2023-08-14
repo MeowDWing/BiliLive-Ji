@@ -23,7 +23,7 @@ def print_set(text: str, tag: str = 'NORMAL', debug_flag: bool = False, log=Fals
         case 'CAPTAIN_BUY_2': begin_str = '\033[38;2;30;144;255m'  # Doder Blue
         case 'CAPTAIN_BUY_1': begin_str = '\033[38;2;65;105;255m'  # Royal Blue
         case 'NORMAL': begin_str = '\033[90m'  # Gray
-        case 'ENTER': pass
+        case 'ENTER': begin_str = '\033[38;2;150;150;150m'  # light gray
         case 'SC' | 'SC_JPN':  # customizing color
             color_str = hex2dec_str(special_color)
             begin_str = f'\033[38;2;{color_str}m'
@@ -66,8 +66,7 @@ def hex2dec_str(str16: str = '#FFFFFF') -> str:
         print_set('You set a WRONG RGB code, color has been reset to 0x000000', tag='ERROR')
         decR = decG = decB = 0
     trans_str = str(decR)+';'+str(decG)+';'+str(decB)
-    return trans_str
+    return trans_str  # str -> xx;xx;xx
 
 
-hex2dec_str()
 

@@ -1,4 +1,33 @@
-et3={'room_display_id': 23141761, 'room_real_id': 23141761, 'type': 'INTERACT_WORD', 'data': {'cmd': 'INTERACT_WORD', 'data': {'contribution': {'grade': 0}, 'core_user_type': 0, 'fans_medal': {'anchor_roomid': 22673512, 'guard_level': 3, 'icon_id': 0, 'is_lighted': 1, 'medal_color': 1725515, 'medal_color_border': 6809855, 'medal_color_end': 5414290, 'medal_color_start': 1725515, 'medal_level': 23, 'medal_name': '带扇人', 'score': 50005573, 'special': '', 'target_id': 698438232}, 'identities': [3, 1], 'is_spread': 0, 'msg_type': 1, 'privilege_type': 0, 'roomid': 23141761, 'score': 1741664616861, 'spread_desc': '', 'spread_info': '', 'tail_icon': 0, 'tail_text': '', 'timestamp': 1691649043, 'trigger_time': 1691649042776919600, 'uid': 171278574, 'uname': '零陵路元正', 'uname_color': ''}, 'is_report': False, 'msg_id': '1622757420848130', 'send_time': 1691649044148}}
+et3 = {
+    'room_display_id': 23141761,
+    'room_real_id': 23141761,
+    'type': 'INTERACT_WORD',
+    'data': {
+        'cmd': 'INTERACT_WORD',
+        'data': {
+            'contribution': {'grade': 0},
+            'core_user_type': 0,
+            'fans_medal': {
+                'anchor_roomid': 22673512, 'guard_level': 3,
+                'icon_id': 0, 'is_lighted': 1, 'medal_color': 1725515,
+                'medal_color_border': 6809855, 'medal_color_end': 5414290,
+                'medal_color_start': 1725515, 'medal_level': 23,
+                'medal_name': '带扇人', 'score': 50005573, 'special': '',
+                'target_id': 698438232
+            },
+            'identities': [3, 1], 'is_spread': 0,
+            'msg_type': 1, 'privilege_type': 0, 'roomid': 23141761,
+            'score': 1741664616861, 'spread_desc': '', 'spread_info': '',
+            'tail_icon': 0, 'tail_text': '', 'timestamp': 1691649043,
+            'trigger_time': 1691649042776919600, 'uid': 171278574,
+            'uname': '零陵路元正', 'uname_color': ''
+        },
+        'is_report': False, 'msg_id': '1622757420848130',
+        'send_time': 1691649044148
+    }
+}
+
+
 et619={'room_display_id': 23141761, 'room_real_id': 23141761, 'type': 'INTERACT_WORD', 'data': {'cmd': 'INTERACT_WORD', 'data': {'contribution': {'grade': 0}, 'core_user_type': 0, 'fans_medal': {'anchor_roomid': 22439496, 'guard_level': 0, 'icon_id': 0, 'is_lighted': 1, 'medal_color': 1725515, 'medal_color_border': 1725515, 'medal_color_end': 5414290, 'medal_color_start': 1725515, 'medal_level': 22, 'medal_name': '可以狗', 'score': 50002251, 'special': '', 'target_id': 651731017}, 'identities': [3, 1], 'is_spread': 0, 'msg_type': 1, 'privilege_type': 0, 'roomid': 23141761, 'score': 1741661294814, 'spread_desc': '', 'spread_info': '', 'tail_icon': 0, 'tail_text': '', 'timestamp': 1691649043, 'trigger_time': 1691649042715643600, 'uid': 25704352, 'uname': '可以接', 'uname_color': ''}, 'is_report': False, 'msg_id': '1622757404594176', 'send_time': 1691649044117}}
 et634={'room_display_id': 23141761, 'room_real_id': 23141761, 'type': 'INTERACT_WORD', 'data': {'cmd': 'INTERACT_WORD', 'data': {'contribution': {'grade': 0}, 'core_user_type': 0, 'fans_medal': {'anchor_roomid': 9196015, 'guard_level': 0, 'icon_id': 0, 'is_lighted': 0, 'medal_color': 9272486, 'medal_color_border': 12632256, 'medal_color_end': 12632256, 'medal_color_start': 12632256, 'medal_level': 10, 'medal_name': '旅行', 'score': 10170, 'special': '', 'target_id': 290515513}, 'identities': [1], 'is_spread': 0, 'msg_type': 1, 'privilege_type': 0, 'roomid': 23141761, 'score': 1691649044253, 'spread_desc': '', 'spread_info': '', 'tail_icon': 0, 'tail_text': '', 'timestamp': 1691649044, 'trigger_time': 1691649043197534000, 'uid': 276935039, 'uname': '月照我影云掩拥', 'uname_color': ''}, 'is_report': False, 'msg_id': '1622757921020416', 'send_time': 1691649045102}}
 et19={'room_display_id': 23141761, 'room_real_id': 23141761, 'type': 'INTERACT_WORD', 'data': {'cmd': 'INTERACT_WORD', 'data': {'contribution': {'grade': 0}, 'core_user_type': 0, 'fans_medal': {'anchor_roomid': 23141761, 'guard_level': 0, 'icon_id': 0, 'is_lighted': 0, 'medal_color': 9272486, 'medal_color_border': 12632256, 'medal_color_end': 12632256, 'medal_color_start': 12632256, 'medal_level': 10, 'medal_name': '鹰快飞', 'score': 13300, 'special': '', 'target_id': 2051617240}, 'identities': [1], 'is_spread': 0, 'msg_type': 1, 'privilege_type': 0, 'roomid': 23141761, 'score': 1691649044400, 'spread_desc': '', 'spread_info': '', 'tail_icon': 0, 'tail_text': '', 'timestamp': 1691649044, 'trigger_time': 1691649043270853600, 'uid': 47714975, 'uname': '海羽心', 'uname_color': ''}, 'is_report': False, 'msg_id': '1622757912629248', 'send_time': 1691649045086}}
