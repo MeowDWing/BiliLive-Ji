@@ -1,4 +1,3 @@
-# import bilibili_api as bapi
 import os
 import random
 import sys
@@ -6,6 +5,7 @@ import iosetting as ios
 import bilibili_api
 from bilibili_api import live, sync, user, exceptions
 import datetime
+from live_function import draw
 import get_from_web as gfw
 
 
@@ -63,9 +63,12 @@ class LiveInfoGet:
         }
         self.max_on_num = 4
 
+        # flag initial zone
         self.reply_flag = reply_flag
         if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
             os.system("cls")
+
+
 
         # dictionary & list initial zone
         #   badge_dict
@@ -142,7 +145,7 @@ class LiveInfoGet:
         * ROOM_RANK: 房间排名更新
         * INTERACT_WORD: 用户进入直播间
         * ACTIVITY_BANNER_UPDATE_V2: 好像是房间名旁边那个xx小时榜
-        本模块自定义事件：
+        自定义事件：
 
         * VIEW: 直播间人气更新
         * ALL: 所有事件
@@ -151,7 +154,6 @@ class LiveInfoGet:
         * VERIFICATION_SUCCESSFUL: 认证成功
 
         """
-
 
         # MAIN zone
         if danmaku_flag:
@@ -404,7 +406,6 @@ class LiveInfoGet:
             os.system('shutdown')
 
         return formatted_time
-
 
     def reply_initial(self):
         SESSDATA = -1

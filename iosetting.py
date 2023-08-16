@@ -5,7 +5,7 @@ WHITE = 0xFFFFFF
 BLACK = 0x000000
 
 
-def print_set(text: str, tag: str = 'NORMAL', debug_flag: bool = False, log=False, special_color='FFFFFF'):
+def print_set(text: str, tag: str = 'NORMAL', debug_flag: bool = False, log=False, special_color='FFFFFF', end='\n'):
     begin_str = ''
     end_str = '\033[0m'
     match tag:
@@ -37,10 +37,10 @@ def print_set(text: str, tag: str = 'NORMAL', debug_flag: bool = False, log=Fals
     # \033[91m[SYSTEM->REPLY MODULE]xxxxxxxxx\033[m
     print(begin_str, end='')
     print(text, end='')
-    print(end_str)
+    print(end_str, end=end)
     if log:
         log_file = open("./logging.txt", mode='a', encoding='utf-8')
-        log_file.write(text+'\n')
+        log_file.write(text+end)
         log_file.close()
 
 
