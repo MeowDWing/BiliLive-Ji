@@ -28,8 +28,9 @@ class LiveInfoGet:
     """
 
     def __init__(self, uid: int = -1, rid: int = -1,  # id zone
-                 up_name: str = '资深小狐狸', crtl_name: str = '吾名喵喵之翼', auto_msg='。',  # str zone
-                 reply_flag: bool = False, cls_flag: bool = False, debug_flag: bool = False,  # flag zone
+                 up_name: str = '资深小狐狸', ctrl_name: str = '吾名喵喵之翼', auto_msg='。',  # str zone
+                 reply_flag: bool = False, cls_flag: bool = False, debug_flag: bool = False,  # flag zone 1
+                 timestamp_flag: bool = False,  # flag zone 2
                  dot_limit: int = 100  # limit zone
                  ):
         """
@@ -46,13 +47,15 @@ class LiveInfoGet:
         :param reply_flag: 回复标记，True的话开启自动回复功能，目前只适配资深小狐狸的，当然以后会有自定义方式来回复 /
                             if the flag is True, auto reply will on
         :param cls_flag: 清屏标记，该标记用于处理win10中cmd转义字符错误的临时标记，为True时启用
+        :param debug_flag: debug标记，目前会在接收1000条弹幕后自动退出，之后会做成元组来接收各个调试信息的开启情况
+        :param timestamp_flag: 时间戳，True则为弹幕增加时间戳，之后会融合如debug作为debug选项
         :param dot_limit: 每dot_limit个中文句号，就自动回复一次 / every dot_limit CN full stop, reply once auto_msg
         """
         # parameter initial zone
         self.room_id = rid
         self.user_id = uid
         self.up_name = up_name
-        self.ctrl_name = crtl_name
+        self.ctrl_name = ctrl_name
         self.dot_limit = dot_limit
         self.auto_msg = auto_msg
         self.debug_flag = debug_flag
@@ -64,6 +67,7 @@ class LiveInfoGet:
         self.max_on_num = 4
 
         # flag initial zone
+        self.timestamp_flag = timestamp_flag
         self.reply_flag = reply_flag
         if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
             os.system("cls")
@@ -273,16 +277,23 @@ class LiveInfoGet:
                 print_flag = 'UP'
 
         # timestamp processing Zone
-        send_timestamp = event['data']['send_time'] / 1000
-        trans_time = self.timestamp_to_Beijing_time(send_timestamp)
+        if self.timestamp_flag:
+            send_timestamp = event['data']['send_time'] / 1000
+            trans_time = self.timestamp_to_Beijing_time(send_timestamp)
+            ios.print_set(f'[{trans_time}]', end='', tag=print_flag)
 
+        # 方案1：
         # print_content:
         #       [timestamp][lvl:badge]Nickname:Says
-        ios.print_set(f'[{trans_time}][{user_fans_lvl}:{user_title}]{nickname}:{danmaku_content}',
+        # ios.print_set(f'[{user_fans_lvl}:{user_title}]{nickname}:{danmaku_content}',
+        #              tag=print_flag)
+        # 方案2
+        # [timestamp][lvl|nickname]says
+        ios.print_set(f'[{user_fans_lvl}|{nickname}]{danmaku_content}',
                       tag=print_flag)
 
     def live_gift(self, event: dict):
-        print(event)
+        # print(event)
         combo_num = 0
         gift_data = event['data']['data']
         action = gift_data['action']
