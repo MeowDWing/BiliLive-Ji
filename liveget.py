@@ -65,14 +65,24 @@ class LiveInfoGet:
             'enter_info': {'nn_str': set(), 'count': 0}
         }
         self.max_on_num = 4
+        self.draw_sheet_line_len = 32
+        self.file_address = './files'
+        if not os.path.exists(self.file_address):
+            os.mkdir('./files')
+        if not os.path.exists(self.file_address+'/draw_sheet'):
+            with open(self.file_address+'./draw_sheet', mode='x'):
+                pass
+        with open(self.file_address+'/draw_sheet', mode='r',) as f:
+            lines = f.readlines()
+            fl = len(lines)
+            ll = len(lines[0])
+            self.draw_sheet_len = fl
 
         # flag initial zone
         self.timestamp_flag = timestamp_flag
         self.reply_flag = reply_flag
         if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
             os.system("cls")
-
-
 
         # dictionary & list initial zone
         #   badge_dict
@@ -241,6 +251,7 @@ class LiveInfoGet:
         danmaku_content = live_info[1]
         user_main_info = live_info[2]  # list[uid, Nickname, Unknown:]
         nickname = user_main_info[1]
+        send_timestamp = event['data']['send_time'] / 1000
 
         if self.reply_flag:
             if danmaku_content == '。':
@@ -269,6 +280,14 @@ class LiveInfoGet:
                 if user_fans_lvl > 20:
                     print_flag = 'CAPTAIN'
                 user_title = self.badge_dict[user_fans_lvl]
+                if danmaku_content == '。':
+                    nn_len = len(nickname)
+                    c = 20 - nn_len
+                    with open(self.file_address+'/draw_sheet', mode='a', encoding='utf-8') as f:
+                        # f.seek()
+                        f.write(f'{int(send_timestamp)}:' + ' ' * c + f'{nickname}\n')
+                        self.draw_sheet_len += 1
+
 
         match nickname:
             case self.ctrl_name:
@@ -278,7 +297,7 @@ class LiveInfoGet:
 
         # timestamp processing Zone
         if self.timestamp_flag:
-            send_timestamp = event['data']['send_time'] / 1000
+
             trans_time = self.timestamp_to_Beijing_time(send_timestamp)
             ios.print_set(f'[{trans_time}]', end='', tag=print_flag)
 
@@ -343,9 +362,9 @@ class LiveInfoGet:
             case 1: tag = 'CAPTAIN_BUY_1'
 
         # print stream format:
-        # [DONATE]>>>[Nickname]<<< 开通了 Gift_name (￥price/1000)
-        # [DONATE]>>>[吾名喵喵之翼]<<< 开通了 舰长 (￥ 138)
-        ios.print_set(f'[DONATE]>>>{captain_name}<<< 开通了 {lvl_name} (￥{price/1000})', tag=tag)
+        # [SHIP]>>>[Nickname]<<< 开通了 Gift_name (￥price/1000)
+        # [SHIP]>>>[吾名喵喵之翼]<<< 开通了 舰长 (￥ 138)
+        ios.print_set(f'[SHIP]>>>{captain_name}<<< 开通了 {lvl_name} (￥{price/1000})', tag=tag)
 
 
 

@@ -1,6 +1,16 @@
 import asyncio
 import iosetting as ios
 
+"""
+受保护的字符串：
+__test
+0x*
+#*
+
+
+> *代表任意16进制字符串
+"""
+
 
 class DrawFunc:
 
@@ -18,7 +28,16 @@ class DrawFunc:
     def initial(self):
         pass
 
-    async def open(self, participate_name: str):
+    def on(self):  # 监听开启
+        pass
+
+    def close(self):  # 监听关闭
+        pass
+
+    async def com_pipe(self, participate_name: str = '__test'):  # 进程通信
+        pass
+
+    def add_aud(self, participate_name: str):
         self.DRAW_SET.add(participate_name)
         self.len = len(self.DRAW_SET)
 
@@ -34,7 +53,11 @@ class DrawFunc:
         for name in self.DRAW_SET:
             ios.print_set(name, end='\t')
             tmp += 1
+            if tmp % 4 == 0:
+                print()
 
+    def reduce(self):
+        pass
 
     def draw(self):
         get = self.DRAW_SET.pop()
