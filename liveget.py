@@ -1,12 +1,17 @@
 import os
 import random
+import time
+
+import requests
 import sys
 import iosetting as ios
 import bilibili_api
 from bilibili_api import live, sync, user, exceptions
 import datetime
+import live_function.audioplay as player
 from live_function import draw
 import get_from_web as gfw
+from collections import deque
 
 
 # Exception Zone
@@ -30,7 +35,7 @@ class LiveInfoGet:
     def __init__(self, uid: int = -1, rid: int = -1,  # id zone
                  up_name: str = '资深小狐狸', ctrl_name: str = '吾名喵喵之翼', auto_msg='。',  # str zone
                  reply_flag: bool = False, cls_flag: bool = False, debug_flag: bool = False,  # flag zone 1
-                 timestamp_flag: bool = False,  # flag zone 2
+                 timestamp_flag: bool = False, read_flag: bool = False,  # flag zone 2
                  dot_limit: int = 100  # limit zone
                  ):
         """
@@ -65,6 +70,10 @@ class LiveInfoGet:
             'enter_info': {'nn_str': set(), 'count': 0}
         }
         self.max_on_num = 4
+
+        # draw zone
+        self.draw_flag = False
+        self.draw_set = set()
         self.draw_sheet_line_len = 32
         self.file_address = './files'
         if not os.path.exists(self.file_address):
@@ -72,13 +81,13 @@ class LiveInfoGet:
         if not os.path.exists(self.file_address+'/draw_sheet'):
             with open(self.file_address+'./draw_sheet', mode='x'):
                 pass
-        with open(self.file_address+'/draw_sheet', mode='r',) as f:
-            lines = f.readlines()
-            fl = len(lines)
-            ll = len(lines[0])
-            self.draw_sheet_len = fl
+
+        # reader zone
+        if not os.path.exists('./audio'):
+            os.mkdir('./audio')
 
         # flag initial zone
+        self.read_flag = read_flag
         self.timestamp_flag = timestamp_flag
         self.reply_flag = reply_flag
         if cls_flag:  # 临时解决win10中cmd和powershell可能是转义字符输出错误，解决后本代码将去除
@@ -137,7 +146,7 @@ class LiveInfoGet:
         :param sc_flag: SC标记
         :param guard_buy_flag: 大航海购买标记
         :param gift_combo_flag: 礼物连击标记
-        :param enter_flag: 进场标记 ！ 建议常关，可能会导致封ip
+        :param enter_flag: 进场标记
         :param sys_notice_flag: 系统提示标记
         :param sc_jpn_flag: sc日语版标记
 
@@ -240,6 +249,7 @@ class LiveInfoGet:
 
         sync(self.room_event_stream.connect())
 
+
     async def live_danmaku(self, event: dict = None):
 
         user_fans_lvl = 0
@@ -280,13 +290,24 @@ class LiveInfoGet:
                 if user_fans_lvl > 20:
                     print_flag = 'CAPTAIN'
                 user_title = self.badge_dict[user_fans_lvl]
-                if danmaku_content == '。':
-                    nn_len = len(nickname)
-                    c = 20 - nn_len
-                    with open(self.file_address+'/draw_sheet', mode='a', encoding='utf-8') as f:
-                        # f.seek()
-                        f.write(f'{int(send_timestamp)}:' + ' ' * c + f'{nickname}\n')
-                        self.draw_sheet_len += 1
+                if self.read_flag:
+                    if len(danmaku_content) > 0:
+                        m = txt2audio(danmaku_content)
+                        with open('./files/danmaku.txt', mode='a', encoding='utf-8') as f:
+                            f.write(m+'\n')
+
+                # if danmaku_content == '。':
+                #     with open(self.file_address+'/draw_sheet', mode='r+', encoding='utf-8') as f:
+                #         lines = f.readlines()
+                #         line1 = lines[0]
+                #         if line1[0] == 'T':
+                #             self.draw_flag = True
+                #         elif line1[0] == 'R':
+                #             lines[0] = 'T\n'
+                #             lines[1] = str(self.draw_set)
+                #             f.writelines(lines)
+                #     if self.draw_flag:
+                #         self.draw_set.add(nickname)
 
 
         match nickname:
@@ -477,5 +498,51 @@ class LiveInfoGet:
             ios.print_set('auto_reply 结束', tag='SYSTEM')
         # await self.sender.send_danmaku(bilibili_api.Danmaku(msg))
         # ios.print_set("[!]successfully reply", content='SUCCESS')
+
+
+def txt2audio(message, api_flag=False):
+    # 如果要配置自己的api，可以
+    if api_flag:
+        SECRET_KEY = ''
+        API_KEY = ''
+    else:
+        with open('address.txt', mode='r', encoding='utf-8') as f:
+            lines = f.readlines()
+            SECRET_KEY = ''
+            API_KEY = ''
+            for line in lines:
+                line = line.strip().split('=')
+                if line[0] == 'API_KEY':
+                    API_KEY = line[1]
+                elif line[0] == 'SECRET_KEY':
+                    SECRET_KEY = line[1]
+
+    url = "https://tsn.baidu.com/text2audio"
+
+    payload = 'tex='+f'{message}'+'&tok=' + get_access_token(API_KEY, SECRET_KEY) + '&cuid=PhVV06OsEfgN63VbSL0xIkM8OZFZQ5Rg&ctp=1&lan=zh&spd=11&pit=7&vol=5&per=0&aue=3'
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': '*/*'
+    }
+    hashm = hash(message)
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    # print(response.text)
+    with open('./audio/'+f'{hashm}'+'.mp3', mode='wb') as f:
+        f.write(response.content)
+
+    return str(hashm)
+
+
+def get_access_token(A, S):
+    """
+    使用 AK，SK 生成鉴权签名（Access Token）
+    :return: access_token，或是None(如果错误)
+    """
+    url = "https://aip.baidubce.com/oauth/2.0/token"
+    params = {"grant_type": "client_credentials", "client_id": A, "client_secret": S}
+    return str(requests.post(url, params=params).json().get("access_token"))
+
 
 

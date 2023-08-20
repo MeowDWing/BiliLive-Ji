@@ -1,5 +1,6 @@
 import asyncio
 import iosetting as ios
+import time
 
 """
 受保护的字符串：
@@ -17,6 +18,8 @@ class DrawFunc:
     def __init__(self):
         self.DRAW_SET = set()
         self.len = len(self.DRAW_SET)
+        self.on_time = 0
+        self.close_time = 0
 
     def __str__(self):
         return self.len
@@ -29,9 +32,14 @@ class DrawFunc:
         pass
 
     def on(self):  # 监听开启
-        pass
+        now = time.time()
+        self.on_time = now
 
     def close(self):  # 监听关闭
+        now = time.time()
+        self.close_time = now
+
+    def read(self):
         pass
 
     async def com_pipe(self, participate_name: str = '__test'):  # 进程通信
@@ -55,9 +63,6 @@ class DrawFunc:
             tmp += 1
             if tmp % 4 == 0:
                 print()
-
-    def reduce(self):
-        pass
 
     def draw(self):
         get = self.DRAW_SET.pop()

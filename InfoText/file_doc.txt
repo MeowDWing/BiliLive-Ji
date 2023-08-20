@@ -1,2 +1,0 @@
-./files
-    /draw_sheet.txt -> 将军名单
