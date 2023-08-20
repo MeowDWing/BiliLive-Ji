@@ -163,5 +163,9 @@ cython_debug/
 temporary/
 address.txt
 only_test.py
+
+# 项目可能自动创建的文件
 livecover/
 logging.txt
+files/
+audio/
